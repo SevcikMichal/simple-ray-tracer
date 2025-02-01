@@ -10,7 +10,7 @@ int main() {
     Vec3 origin(0.0, 0.0, 0.0);
 
     // Create scene
-    Scene scene(DirectionalLight(Vec3(-1, 1, 1), Vec3(0.2, 0.2, 0.2)));
+    Scene scene(DirectionalLight(Vec3(-1, 1, 1), Vec3(0.8, 0.8, 0.8), 0.2f));
     
     // Add objects
     scene.addObject(new Sphere(Vec3(0, 0, -1), 0.5, Vec3(1, 1, 1)));  // Red sphere
