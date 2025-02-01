@@ -1,6 +1,7 @@
 #include "raytracer.h"
 #include "sphere.h"
 #include <fstream>
+#include <memory>
 
 int main() {
     const int width = 800, height = 400;
@@ -9,16 +10,16 @@ int main() {
     Vec3 vertical(0.0, 2.0, 0.0);
     Vec3 origin(0.0, 0.0, 0.0);
 
-    // Create scene
-    Scene scene(DirectionalLight(Vec3(-1, 1, 1), Vec3(0.8, 0.8, 0.8), 0.2f));
-    
-    // Add objects
-    scene.addObject(new Sphere(Vec3(0, 0, -1), 0.5, Vec3(1, 1, 1)));  // Red sphere
-    scene.addObject(new Sphere(Vec3(1, -0.5, -1.5), 0.3, Vec3(1, 1, 1)));  // Green sphere
+    // Create scene with a directional light with soft shadows
+    Scene scene(DirectionalLight(Vec3(-0.5, -1, -1), Vec3(0.8, 0.8, 0.8), 0.2f));
 
-    // Add point lights with different softness
-    scene.addPointLight(PointLight(Vec3(1, 1, 0), Vec3(0.1, 0.1, 1), 1.5f, 0.1f));  // Small light = sharp shadow
-    scene.addPointLight(PointLight(Vec3(-1, 2, -1), Vec3(1, 0.1, 0.1), 1.2f, 0.4f));  // Larger light = softer shadows
+    // Add objects using std::make_unique
+    scene.addObject(std::make_unique<Sphere>(Vec3(0, 0, -1), 0.5, Vec3(1, 0.1, 0.1)));  // Red sphere
+    scene.addObject(std::make_unique<Sphere>(Vec3(1, -0.5, -1.5), 0.3, Vec3(0.1, 1, 0.1)));  // Green sphere
+
+    // Add point lights with different shadow softness
+    scene.addPointLight(PointLight(Vec3(1, 1, 0), Vec3(1, 1, 0.1), 1.5f, 0.1f));  // Small light = sharp shadow
+    scene.addPointLight(PointLight(Vec3(-1, 2, -1), Vec3(0.1, 1, 0.1), 1.2f, 0.4f));  // Larger light = softer shadows
 
     std::ofstream image("output.ppm");
     image << "P3\n" << width << " " << height << "\n255\n";
@@ -33,8 +34,5 @@ int main() {
 
     image.close();
     
-    // Clean up dynamically allocated objects
-    for (auto* obj : scene.objects) delete obj;
-
     return 0;
 }

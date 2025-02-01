@@ -13,12 +13,12 @@ public:
         const Object* hitObject = nullptr;
 
         // Find the closest object hit by the ray
-        for (const auto* object : scene.objects) {
+        for (const auto& object : scene.objects) {  // unique_ptr now
             float t;
             Vec3 normal;
             if (object->hit(r, t, normal) && t < closest_t) {
                 closest_t = t;
-                hitObject = object;
+                hitObject = object.get();  // Access raw pointer
                 hit_normal = normal;
             }
         }
@@ -58,7 +58,7 @@ public:
             Ray shadow_ray(hit_point + normal * 0.001f, light_dir);
 
             bool in_shadow = false;
-            for (const auto* object : scene.objects) {
+            for (const auto& object : scene.objects) {
                 float t;
                 Vec3 temp_normal;
                 if (object->hit(shadow_ray, t, temp_normal)) {
@@ -90,7 +90,7 @@ public:
             Ray shadow_ray(hit_point + normal * 0.001f, jittered_dir);
     
             bool in_shadow = false;
-            for (const auto* object : scene.objects) {
+            for (const auto& object : scene.objects) {
                 float t;
                 Vec3 temp_normal;
                 if (object->hit(shadow_ray, t, temp_normal)) {
