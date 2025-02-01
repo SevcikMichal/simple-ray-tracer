@@ -56,11 +56,13 @@ int main() {
     Material red(Vec3(1, 0.1, 0.1), Vec3(1, 1, 1), 32.0f);
     Material green(Vec3(0.1, 1, 0.1), Vec3(1, 1, 1), 16.0f);
     Material mirror(Vec3(1, 1, 1), Vec3(1, 1, 1), 64.0f, 1.0f);
+    Material glass(Vec3(1, 1, 1), Vec3(1, 1, 1), 64.0f, 0.1f, 1.52f);
 
-    scene.addObject(std::make_unique<Sphere>(Vec3(0, 0, -1), 0.5, red));
-    scene.addObject(std::make_unique<Sphere>(Vec3(1, -0.5, -1.5), 0.3, green));
-    scene.addObject(std::make_unique<Sphere>(Vec3(-1, 0, -1.2), 0.5, mirror));  
-
+    scene.addObject(std::make_unique<Sphere>(Vec3(0, 0, -2), 0.5, red));
+    scene.addObject(std::make_unique<Sphere>(Vec3(1, 0, -2), 0.3, green));
+    scene.addObject(std::make_unique<Sphere>(Vec3(-1, 0, -2), 0.3, mirror));
+    scene.addObject(std::make_unique<Sphere>(Vec3(0, 0, -1), 0.5, glass));
+    
     scene.addPointLight(PointLight(Vec3(1, 1, 0), Vec3(1, 1, 0.1), 1.5f, 0.1f));
     scene.addPointLight(PointLight(Vec3(-1, 2, -1), Vec3(0.1, 1, 0.1), 1.2f, 0.4f));
 
