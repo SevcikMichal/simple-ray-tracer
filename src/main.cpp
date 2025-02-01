@@ -24,10 +24,12 @@ int main() {
     std::ofstream image("output.ppm");
     image << "P3\n" << width << " " << height << "\n255\n";
 
+    int shadow_samples = 16;  // Change this to adjust softness of shadows
+
     for (int j = height - 1; j >= 0; j--) {
         for (int i = 0; i < width; i++) {
             Ray r(origin, lower_left + (float(i) / width) * horizontal + (float(j) / height) * vertical);
-            Vec3 col = RayTracer::trace(r, scene);
+            Vec3 col = RayTracer::trace(r, scene, shadow_samples);
             image << int(255.99 * col.x) << " " << int(255.99 * col.y) << " " << int(255.99 * col.z) << "\n";
         }
     }
