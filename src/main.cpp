@@ -13,9 +13,14 @@ const int shadow_samples = 8;    // Soft shadow samples
 
 int num_threads = std::thread::hardware_concurrency();
 
-Vec3 lower_left(-2.0, -1.0, -1.0);
-Vec3 horizontal(4.0, 0.0, 0.0);
-Vec3 vertical(0.0, 2.0, 0.0);
+float aspect_ratio = float(width) / float(height);
+float viewport_height = 2.0;
+float viewport_width = viewport_height * aspect_ratio;
+
+Vec3 lower_left(-viewport_width / 2, -viewport_height / 2, -1.0);
+Vec3 horizontal(viewport_width, 0.0, 0.0);
+Vec3 vertical(0.0, viewport_height, 0.0);
+
 Vec3 origin(0.0, 0.0, 0.0);
 
 // Shared buffer for computed colors (avoid file write conflicts)
