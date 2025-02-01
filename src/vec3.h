@@ -17,10 +17,8 @@ public:
     Vec3 operator*(float t) const { return Vec3(x * t, y * t, z * t); }
     Vec3 operator/(float t) const { return Vec3(x / t, y / t, z / t); }
 
-    // Ensure scalar multiplication works both ways
-    friend Vec3 operator*(float t, const Vec3& v) {
-        return Vec3(t * v.x, t * v.y, t * v.z);
-    }
+    friend Vec3 operator*(float t, const Vec3& v) { return Vec3(t * v.x, t * v.y, t * v.z); }
+    Vec3 operator*(const Vec3& v) const { return Vec3(x * v.x, y * v.y, z * v.z); }
 
     float dot(const Vec3& v) const { return x * v.x + y * v.y + z * v.z; }
 
