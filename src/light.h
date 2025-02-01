@@ -13,4 +13,12 @@ public:
         : position(pos), color(col), intensity(intensity) {}
 };
 
+class DirectionalLight {
+public:
+    Vec3 direction;
+    Vec3 color;
+
+    DirectionalLight(const Vec3& dir, const Vec3& col) : direction(dir.normalize()), color(col) {}
+};
+
 #endif
