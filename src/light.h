@@ -8,9 +8,10 @@ public:
     Vec3 position;
     Vec3 color;
     float intensity;
+    float radius;
 
-    PointLight(const Vec3& pos, const Vec3& col, float intensity = 1.0f)
-        : position(pos), color(col), intensity(intensity) {}
+    PointLight(const Vec3& pos, const Vec3& col, float intensity = 1.0f, float radius = 0.2f)
+        : position(pos), color(col), intensity(intensity), radius(radius) {}
 };
 
 class DirectionalLight {
