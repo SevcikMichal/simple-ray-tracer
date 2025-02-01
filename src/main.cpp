@@ -22,8 +22,10 @@ Vec3 ray_color(const Ray& r) {
         Vec3 hit_point = r.origin + r.direction * t;
         Vec3 normal = (hit_point - Vec3(0, 0, -1)).normalize();
 
-        float brightness = 0.5f * (normal.y + 1.0f);  // Map [-1,1] to [0,1]
-        return Vec3(brightness, 0.0f, 0.0f);  // Red with shading
+        Vec3 light_dir = Vec3(0.5, 1, 1).normalize();
+        float brightness = std::max(0.0f, normal.dot(light_dir));  // Diffuse shading
+
+        return brightness * Vec3(1, 0, 0);  // Shaded red
     }
 
     // Background gradient
