@@ -22,10 +22,17 @@ Vec3 ray_color(const Ray& r) {
         Vec3 hit_point = r.origin + r.direction * t;
         Vec3 normal = (hit_point - Vec3(0, 0, -1)).normalize();
 
-        Vec3 light_dir = Vec3(0.5, 1, 1).normalize();
-        float brightness = std::max(0.0f, normal.dot(light_dir));  // Diffuse shading
+        Vec3 light_dir = Vec3(-0.5, 1, 1).normalize();  // Light from top-left front
+        Vec3 view_dir = -r.direction.normalize();  // Camera looks in -ray direction
+        Vec3 halfway = (light_dir + view_dir).normalize();  // Blinn-Phong halfway vector
 
-        return brightness * Vec3(1, 0, 0);  // Shaded red
+        float diffuse = std::max(0.0f, normal.dot(light_dir));  // Diffuse shading
+        float specular = pow(std::max(0.0f, normal.dot(halfway)), 128);  // Shininess
+
+        Vec3 base_color = Vec3(1, 0, 0);  // Red base color
+        Vec3 final_color = diffuse * base_color + specular * Vec3(1, 1, 1);  // White specular
+
+        return final_color;
     }
 
     // Background gradient
