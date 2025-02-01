@@ -10,16 +10,16 @@ int main() {
     Vec3 vertical(0.0, 2.0, 0.0);
     Vec3 origin(0.0, 0.0, 0.0);
 
-    // Create scene with a directional light with soft shadows
-    Scene scene(DirectionalLight(Vec3(-0.5, -1, -1), Vec3(0.8, 0.8, 0.8), 0.2f));
+    Scene scene(DirectionalLight(Vec3(-1, 1, 1), Vec3(0.8, 0.8, 0.8), 0.2f));
 
-    // Add objects using std::make_unique
-    scene.addObject(std::make_unique<Sphere>(Vec3(0, 0, -1), 0.5, Vec3(1, 0.1, 0.1)));  // Red sphere
-    scene.addObject(std::make_unique<Sphere>(Vec3(1, -0.5, -1.5), 0.3, Vec3(0.1, 1, 0.1)));  // Green sphere
+    Material red(Vec3(1, 0.1, 0.1), Vec3(1, 1, 1), 32.0f);
+    Material green(Vec3(0.1, 1, 0.1), Vec3(1, 1, 1), 16.0f);
 
-    // Add point lights with different shadow softness
-    scene.addPointLight(PointLight(Vec3(1, 1, 0), Vec3(1, 1, 0.1), 1.5f, 0.1f));  // Small light = sharp shadow
-    scene.addPointLight(PointLight(Vec3(-1, 2, -1), Vec3(0.1, 1, 0.1), 1.2f, 0.4f));  // Larger light = softer shadows
+    scene.addObject(std::make_unique<Sphere>(Vec3(0, 0, -1), 0.5, red));
+    scene.addObject(std::make_unique<Sphere>(Vec3(1, -0.5, -1.5), 0.3, green));
+
+    scene.addPointLight(PointLight(Vec3(1, 1, 0), Vec3(1, 1, 0.1), 1.5f, 0.1f));
+    scene.addPointLight(PointLight(Vec3(-1, 2, -1), Vec3(0.1, 1, 0.1), 1.2f, 0.4f));
 
     std::ofstream image("output.ppm");
     image << "P3\n" << width << " " << height << "\n255\n";
@@ -33,6 +33,5 @@ int main() {
     }
 
     image.close();
-    
     return 0;
 }

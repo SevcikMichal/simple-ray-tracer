@@ -8,7 +8,7 @@ public:
     Vec3 center;
     float radius;
 
-    Sphere(const Vec3& c, float r, const Vec3& col) : Object(col), center(c), radius(r) {}
+    Sphere(const Vec3& c, float r, const Material& mat) : Object(mat), center(c), radius(r) {}
 
     bool hit(const Ray& r, float& t, Vec3& normal) const override {
         Vec3 oc = r.origin - center;

@@ -2,13 +2,13 @@
 #define OBJECT_H
 
 #include "ray.h"
+#include "material.h"
 
 class Object {
 public:
-    Vec3 color;
+    Material material;
 
-    Object(const Vec3& col) : color(col) {}
-
+    Object(const Material& mat) : material(mat) {}
     virtual ~Object() {}
 
     // Every object must implement its own `hit` function
