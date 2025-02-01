@@ -51,7 +51,7 @@ void renderRows(int start_row, int end_row, const Scene& scene) {
 int main() {
     if (num_threads == 0) num_threads = 4;  
 
-    Scene scene(DirectionalLight(Vec3(-1, 1, 1), Vec3(0.8, 0.8, 0.8), 0.2f));
+    Scene scene(DirectionalLight(Vec3(1, 1, 1), Vec3(0.8, 0.8, 0.8), 0.2f));
 
     Material red(Vec3(1, 0.1, 0.1), Vec3(1, 1, 1), 32.0f);
     Material green(Vec3(0.1, 1, 0.1), Vec3(1, 1, 1), 16.0f);
@@ -63,8 +63,8 @@ int main() {
     scene.addObject(std::make_unique<Sphere>(Vec3(-1, 0, -2), 0.3, mirror));
     scene.addObject(std::make_unique<Sphere>(Vec3(0, 0, -1), 0.5, glass));
     
-    scene.addPointLight(PointLight(Vec3(1, 1, 0), Vec3(1, 1, 0.1), 1.5f, 0.1f));
-    scene.addPointLight(PointLight(Vec3(-1, 2, -1), Vec3(0.1, 1, 0.1), 1.2f, 0.4f));
+    scene.addPointLight(PointLight(Vec3(1, 1, 0), Vec3(1, 1, 0.1), 0.5f, 0.1f));
+    scene.addPointLight(PointLight(Vec3(-1, 2, -1), Vec3(0.1, 1, 0.1), 0.2f, 0.4f));
 
     // Create and launch threads
     std::vector<std::thread> threads;

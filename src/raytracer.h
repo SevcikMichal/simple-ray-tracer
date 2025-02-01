@@ -4,6 +4,7 @@
 #include "scene.h"
 #include "ray.h"
 #include <random>
+#include <cmath>
 
 class RayTracer {
 public:
@@ -24,52 +25,53 @@ public:
             }
         }
 
-        if (hitObject) {
-            Vec3 hit_point = r.at(closest_t);
-            Vec3 total_light(0, 0, 0);
-
-            // Compute direct lighting
-            if (hitObject->material.reflectivity == 0.0f && hitObject->material.ior == 1.0f) {
-                for (const auto& light : scene.pointLights) {
-                    total_light = total_light + computeLighting(hit_point, hit_normal, light, hitObject->material, scene, shadow_samples);
-                }
-                total_light = total_light + computeLightingDirectional(hit_point, hit_normal, scene.dirLight, hitObject->material, scene, shadow_samples);
-                total_light = total_light * hitObject->material.diffuse;  // Apply material color
-            }
-
-            Vec3 reflected_color(0, 0, 0);
-            Vec3 refracted_color(0, 0, 0);
-            float reflectivity = hitObject->material.reflectivity;
-            float transmission = 1.0f - reflectivity;
-
-            // Compute reflection
-            if (reflectivity > 0.0f) {
-                Vec3 reflected_dir = r.direction - 2 * r.direction.dot(hit_normal) * hit_normal;
-                Ray reflected_ray(hit_point + hit_normal * 0.001f, reflected_dir);
-                reflected_color = trace(reflected_ray, scene, shadow_samples, depth - 1);
-            }
-
-            // Compute refraction
-            if (hitObject->material.ior > 1.0f) {
-                Vec3 refracted_dir;
-                if (refract(r.direction, hit_normal, hitObject->material.ior, refracted_dir)) {
-                    Ray refracted_ray(hit_point - hit_normal * 0.001f, refracted_dir);
-                    refracted_color = trace(refracted_ray, scene, shadow_samples, depth - 1);
-                } else {
-                    refracted_color = reflected_color;  // Total internal reflection
-                }
-            }
-
-            // Correct blending of diffuse, reflection, and refraction
-            float refractive_blend = (hitObject->material.ior > 1.0f) ? (1.0f - reflectivity) : 0.0f;
-            return total_light * (1.0f - reflectivity - refractive_blend) 
-                + reflectivity * reflected_color 
-                + refractive_blend * refracted_color;
+        // If no object is hit, return background color
+        if (!hitObject) {
+            Vec3 unit_direction = r.direction.normalize();
+            float t = 0.5f * (unit_direction.y + 1.0f);
+            return (1.0f - t) * Vec3(1.0f, 1.0f, 1.0f) + t * Vec3(0.5f, 0.7f, 1.0f);
         }
 
-        Vec3 unit_direction = r.direction.normalize();
-        float t = 0.5f * (unit_direction.y + 1.0f);
-        return (1.0f - t) * Vec3(1.0f, 1.0f, 1.0f) + t * Vec3(0.5f, 0.7f, 1.0f);
+        Vec3 hit_point = r.at(closest_t);
+        Vec3 total_light(0, 0, 0);
+
+        for (const auto& light : scene.pointLights) {
+            total_light = total_light + computeLighting(hit_point, hit_normal, light, hitObject->material, scene, shadow_samples);
+        }
+        
+        total_light = total_light + computeLightingDirectional(hit_point, hit_normal, scene.dirLight, hitObject->material, scene, shadow_samples);
+
+        total_light = total_light * hitObject->material.diffuse;
+
+        Vec3 reflected_color(0, 0, 0);
+        Vec3 refracted_color(0, 0, 0);
+
+        float fresnel_coeff = fresnel(r.direction, hit_normal, hitObject->material.ior);
+
+        if (hitObject->material.ior > 1.0f) {
+            Vec3 refracted_dir;
+            bool can_refract = refract(r.direction, hit_normal, hitObject->material.ior, refracted_dir);
+
+            if (!can_refract || fresnel_coeff > 0.95f) {  
+                Vec3 reflected_dir = r.direction - 2 * r.direction.dot(hit_normal) * hit_normal;
+                Ray reflected_ray(hit_point + hit_normal * 0.001f, reflected_dir);
+                return trace(reflected_ray, scene, shadow_samples, depth - 1);
+            } else if (fresnel_coeff < 0.05f) {  
+                Ray refracted_ray(hit_point - hit_normal * 0.001f, refracted_dir);
+                return trace(refracted_ray, scene, shadow_samples, depth - 1);
+            } else { 
+                if ((rand() / (RAND_MAX + 1.0)) < fresnel_coeff) {  // Reflect
+                    Vec3 reflected_dir = r.direction - 2 * r.direction.dot(hit_normal) * hit_normal;
+                    Ray reflected_ray(hit_point + hit_normal * 0.001f, reflected_dir);
+                    return trace(reflected_ray, scene, shadow_samples, depth - 1);
+                } else {  // Refract
+                    Ray refracted_ray(hit_point - hit_normal * 0.001f, refracted_dir);
+                    return trace(refracted_ray, scene, shadow_samples, depth - 1);
+                }
+            }
+        }
+
+        return total_light;
     }
 
     static bool refract(const Vec3& incident, Vec3 normal, float ior, Vec3& refracted) {
@@ -82,7 +84,18 @@ public:
     
         refracted = eta_ratio * incident + (eta_ratio * cos_theta - std::sqrt(k)) * normal;
         return true;
-    }       
+    }
+
+    static float fresnel(const Vec3& incident, const Vec3& normal, float ior) {
+        float cos_theta = std::max(-incident.dot(normal), 0.0f);
+        float eta_i = 1.0f;  // Air IOR
+        float eta_t = ior;   // Material IOR
+
+        if (cos_theta > 0) std::swap(eta_i, eta_t);
+
+        float F0 = std::pow((eta_i - eta_t) / (eta_i + eta_t), 2.0f);  // Base Reflectivity
+        return F0 + (1.0f - F0) * std::pow(1.0f - cos_theta, 5.0f);
+    }
 
     static Vec3 computeLighting(const Vec3& hit_point, const Vec3& normal, const PointLight& light, const Material& material, const Scene& scene, int shadow_samples) {
         int visible_samples = 0;
