@@ -10,6 +10,7 @@ const int width = 800;
 const int height = 400;
 const int samples_per_pixel = 16;  // Anti-aliasing samples
 const int shadow_samples = 8;    // Soft shadow samples
+const int max_bounces = 5;      // Reflection max bounces
 
 int num_threads = std::thread::hardware_concurrency();
 
@@ -39,7 +40,7 @@ void renderRows(int start_row, int end_row, const Scene& scene) {
                 float u = (i + rand_offset(gen)) / float(width);
                 float v = (j + rand_offset(gen)) / float(height);
                 Ray r(origin, lower_left + u * horizontal + v * vertical);
-                color = color + RayTracer::trace(r, scene, shadow_samples);
+                color = color + RayTracer::trace(r, scene, shadow_samples, max_bounces);
             }
 
             image_buffer[j][i] = color / float(samples_per_pixel);  // Store averaged color
@@ -54,9 +55,11 @@ int main() {
 
     Material red(Vec3(1, 0.1, 0.1), Vec3(1, 1, 1), 32.0f);
     Material green(Vec3(0.1, 1, 0.1), Vec3(1, 1, 1), 16.0f);
+    Material mirror(Vec3(1, 1, 1), Vec3(1, 1, 1), 64.0f, 1.0f);
 
     scene.addObject(std::make_unique<Sphere>(Vec3(0, 0, -1), 0.5, red));
     scene.addObject(std::make_unique<Sphere>(Vec3(1, -0.5, -1.5), 0.3, green));
+    scene.addObject(std::make_unique<Sphere>(Vec3(-1, 0, -1.2), 0.5, mirror));  
 
     scene.addPointLight(PointLight(Vec3(1, 1, 0), Vec3(1, 1, 0.1), 1.5f, 0.1f));
     scene.addPointLight(PointLight(Vec3(-1, 2, -1), Vec3(0.1, 1, 0.1), 1.2f, 0.4f));
@@ -82,7 +85,7 @@ int main() {
     for (int j = height - 1; j >= 0; j--) {
         for (int i = 0; i < width; i++) {
             Vec3& col = image_buffer[j][i];
-            image << int(255.99 * col.x) << " " << int(255.99 * col.y) << " " << int(255.99 * col.z) << "\n";
+            image << int(255 * col.x) << " " << int(255 * col.y) << " " << int(255 * col.z) << "\n";
         }
     }
 

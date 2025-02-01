@@ -7,7 +7,9 @@
 
 class RayTracer {
 public:
-    static Vec3 trace(const Ray& r, const Scene& scene, int shadow_samples) {
+    static Vec3 trace(const Ray& r, const Scene& scene, int shadow_samples, int depth = 5) {
+        if (depth <= 0) return Vec3(0, 0, 0);  // Stop recursion after a few bounces
+
         float closest_t = INFINITY;
         Vec3 hit_normal;
         const Object* hitObject = nullptr;
@@ -26,13 +28,24 @@ public:
             Vec3 hit_point = r.at(closest_t);
             Vec3 total_light(0, 0, 0);
 
+            // Compute direct lighting
             for (const auto& light : scene.pointLights) {
                 total_light = total_light + computeLighting(hit_point, hit_normal, light, hitObject->material, scene, shadow_samples);
             }
             total_light = total_light + computeLightingDirectional(hit_point, hit_normal, scene.dirLight, hitObject->material, scene, shadow_samples);
+
+            // Compute reflection
+            if (hitObject->material.reflectivity > 0.0f) {
+                Vec3 reflected_dir = r.direction - 2 * r.direction.dot(hit_normal) * hit_normal;
+                Ray reflected_ray(hit_point + hit_normal * 0.001f, reflected_dir);
+                Vec3 reflected_color = trace(reflected_ray, scene, shadow_samples, depth - 1);
+                total_light = total_light * (1.0f - hitObject->material.reflectivity) + reflected_color * hitObject->material.reflectivity;
+            }
+
             return total_light;
         }
 
+        // Background gradient
         Vec3 unit_direction = r.direction.normalize();
         float t = 0.5f * (unit_direction.y + 1.0f);
         return (1.0f - t) * Vec3(1.0f, 1.0f, 1.0f) + t * Vec3(0.5f, 0.7f, 1.0f);

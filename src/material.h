@@ -1,3 +1,4 @@
+// material.h
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
@@ -5,12 +6,13 @@
 
 class Material {
 public:
-    Vec3 diffuse;   // Diffuse color
-    Vec3 specular;  // Specular color
-    float shininess; // Shininess exponent
+    Vec3 diffuse;
+    Vec3 specular;
+    float shininess;
+    float reflectivity;
 
-    Material(const Vec3& d, const Vec3& s, float sh)
-        : diffuse(d), specular(s), shininess(sh) {}
+    Material(const Vec3& d, const Vec3& s, float sh, float refl = 0.0f)
+        : diffuse(d), specular(s), shininess(sh), reflectivity(refl) {}
 };
 
 #endif
